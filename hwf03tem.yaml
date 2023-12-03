@@ -1,0 +1,78 @@
+esphome:
+  name: hwf03tem
+
+esp8266:
+  board: esp01_1m
+
+web_server:
+  port: 80
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: ""
+
+ota:
+  password: ""
+
+wifi:
+  ssid: "replace-with-ssid"
+  password: "replace-with-wifi-password"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "HWF03TEM"
+    password: ""
+
+
+switch:
+  - platform: gpio
+    name: "Main Relay + 2 LEDS"
+    restore_mode:  ALWAYS_ON
+    pin: GPIO14
+    id: relay
+
+  - platform: gpio
+    name: "Single LED"
+    restore_mode:  ALWAYS_ON
+    inverted: true
+    pin: GPIO13
+
+binary_sensor:
+  - platform: gpio
+    name: "User facing Button"
+    id: user_button
+    pin:
+      number: GPIO0
+      inverted: true
+    on_press:
+      then:
+        - switch.toggle: relay
+
+substitutions:
+  voltage_divider: "2100"
+  current_resistor: "0.001"
+  current_multiply: "1"
+
+sensor:
+  - platform: hlw8012
+    current_resistor: ${current_resistor}
+    voltage_divider: ${voltage_divider}
+    sel_pin:
+      number: 12
+      inverted: true
+    cf_pin: 4
+    cf1_pin: 5
+    current:
+      name: "HLW8012 Current"
+      filters:
+        - multiply: ${current_multiply}
+    voltage:
+      name: "HLW8012 Voltage"
+    power:
+      name: "HLW8012 Power"
+    energy:
+      name: "HLW8012 Energy"
+    update_interval: 60s
